@@ -59,6 +59,7 @@ const styles: Record<string, CSSProperties> = {
 };
 
 export const metadata = { title: "History" };
+export const dynamic = "force-dynamic";
 
 export default async function HistoryPage({
   searchParams,

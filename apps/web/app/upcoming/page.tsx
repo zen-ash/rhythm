@@ -44,6 +44,7 @@ const styles: Record<string, CSSProperties> = {
 };
 
 export const metadata = { title: "Upcoming" };
+export const dynamic = "force-dynamic";
 
 export default async function UpcomingPage() {
   const supabase = await createClient();

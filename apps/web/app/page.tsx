@@ -152,6 +152,8 @@ const styles: Record<string, CSSProperties> = {
 };
 
 export const metadata = { title: "Today" };
+// Per-user, cookie/session-bound page — never prerender at build.
+export const dynamic = "force-dynamic";
 
 export default async function Home({
   searchParams,
