@@ -1,0 +1,22 @@
+{
+  "expo": {
+    "name": "Rhythm",
+    "slug": "focus",
+    "scheme": "focus",
+    "version": "1.0.0",
+    "orientation": "portrait",
+    "userInterfaceStyle": "automatic",
+    "platforms": [
+      "ios"
+    ],
+    "ios": {
+      "supportsTablet": true,
+      "bundleIdentifier": "com.aayush.productivity",
+      "buildNumber": "1"
+    },
+    "newArchEnabled": true,
+    "plugins": [
+      "@react-native-community/datetimepicker"
+    ]
+  }
+}

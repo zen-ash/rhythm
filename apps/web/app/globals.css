@@ -1,0 +1,292 @@
+/* Theme tokens. Inline styles reference these via var(--token), so light/dark
+   switches purely in CSS — no layout or class changes.
+
+   Resolution order:
+   - Base :root = light.
+   - System mode (no explicit choice): a dark OS applies the dark block via the
+     media query, scoped to :root:not([data-theme]).
+   - Manual choice: an inline script in <head> sets data-theme="light"|"dark" on
+     <html> before paint, which wins over the media query (and avoids flicker). */
+:root {
+  color-scheme: light;
+  --bg: #ffffff;
+  --surface: #f7f7f8;
+  --text: #111111;
+  --muted: #666666;
+  --subtle: #999999;
+  --border: #e5e5e5;
+  --danger: #b00020;
+  --accent: #111111;
+  /* Outer page "canvas" sits a step off the inner workspace surface. */
+  --canvas: #f4f3f1;
+  --workspace-shadow: 0 1px 2px rgba(17, 17, 17, 0.04),
+    0 10px 30px rgba(17, 17, 17, 0.06);
+}
+
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme]) {
+    color-scheme: dark;
+    --bg: #0b0b0c;
+    --surface: #161617;
+    --text: #f2f2f2;
+    --muted: #a8a8ad;
+    --subtle: #74747a;
+    --border: #2a2a2c;
+    --danger: #ff6b6b;
+    --accent: #f2f2f2;
+    --canvas: #050506;
+    --workspace-shadow: 0 1px 2px rgba(0, 0, 0, 0.5),
+      0 14px 34px rgba(0, 0, 0, 0.45);
+  }
+}
+
+:root[data-theme="dark"] {
+  color-scheme: dark;
+  --bg: #0b0b0c;
+  --surface: #161617;
+  --text: #f2f2f2;
+  --muted: #a8a8ad;
+  --subtle: #74747a;
+  --border: #2a2a2c;
+  --danger: #ff6b6b;
+  --accent: #f2f2f2;
+  --canvas: #050506;
+  --workspace-shadow: 0 1px 2px rgba(0, 0, 0, 0.5),
+    0 14px 34px rgba(0, 0, 0, 0.45);
+}
+
+html,
+body {
+  background: var(--canvas);
+  color: var(--text);
+}
+
+/* Thin, token-based scrollbars (no harsh browser default). */
+* {
+  scrollbar-width: thin;
+  scrollbar-color: var(--border) transparent;
+}
+::-webkit-scrollbar {
+  width: 10px;
+  height: 10px;
+}
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+::-webkit-scrollbar-thumb {
+  background: var(--border);
+  border-radius: 999px;
+  border: 3px solid var(--canvas);
+}
+::-webkit-scrollbar-thumb:hover {
+  background: var(--subtle);
+}
+
+/* ===========================================================================
+   Craft pass: crisper type + quiet interaction states. Tokens only — no new
+   colors. Interactive base styles live inline; these add transitions, hover,
+   and focus states. State rules use !important purely to override the inline
+   base color/background/outline for :hover / :focus — never layout/behavior.
+   =========================================================================== */
+
+html {
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  text-rendering: optimizeLegibility;
+}
+
+/* Confident headings. */
+h1 {
+  letter-spacing: -0.02em;
+}
+
+/* Targeted transitions on interactive elements (never transition-all). */
+a,
+button,
+input,
+textarea,
+select {
+  transition:
+    background-color 0.15s ease,
+    border-color 0.15s ease,
+    color 0.15s ease,
+    opacity 0.15s ease;
+}
+
+/* Quiet, consistent keyboard focus ring (overrides inline outline:none). */
+a:focus-visible,
+button:focus-visible,
+input:focus-visible,
+textarea:focus-visible,
+select:focus-visible {
+  outline: 2px solid var(--accent) !important;
+  outline-offset: 2px;
+}
+
+/* Nav links brighten to full text on hover. */
+.nav-link:hover {
+  color: var(--text) !important;
+}
+
+/* Task rows get a very subtle full-width surface wash on hover. */
+.task-row {
+  transition: background-color 0.12s ease;
+}
+.task-row:hover {
+  background-color: var(--surface);
+}
+
+/* Inputs / selects / textareas: border firms up on focus. */
+.field:focus {
+  border-color: var(--text) !important;
+}
+
+/* Buttons. */
+.btn-primary:hover {
+  opacity: 0.88;
+}
+.btn-outline:hover {
+  background-color: var(--surface) !important;
+  border-color: var(--text) !important;
+}
+.btn-ghost:hover {
+  color: var(--text) !important;
+}
+.btn-danger:hover {
+  background-color: var(--surface) !important;
+}
+
+/* Segmented controls: unselected item brightens on hover. */
+.seg-item:hover {
+  color: var(--text) !important;
+}
+
+/* ---------------------------------------------------------------------------
+   Premium canvas: the centered workspace reads as a lifted surface sitting on
+   the off-canvas page background.
+   --------------------------------------------------------------------------- */
+.workspace {
+  width: 100%;
+  max-width: 600px;
+  /* Hug content height (the parent <main> stretches by default). */
+  align-self: flex-start;
+  background: var(--bg);
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  box-shadow: var(--workspace-shadow);
+  padding: 40px 36px;
+}
+
+/* Page-specific widths. The nav centers its links (see MainNav), so it stays
+   anchored to the viewport center regardless of which width a route uses. */
+.workspace-wide {
+  max-width: 660px;
+}
+.workspace-review {
+  max-width: 720px;
+}
+
+.workspace-sm {
+  background: var(--bg);
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  box-shadow: var(--workspace-shadow);
+  padding: 32px 28px;
+}
+
+/* Metadata pill: a calm, scannable chip for dates / times / durations. */
+.pill {
+  display: inline-block;
+  padding: 3px 9px;
+  border-radius: 999px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  color: var(--subtle);
+  font-size: 12px;
+  line-height: 1.4;
+  white-space: nowrap;
+}
+
+/* ---------------------------------------------------------------------------
+   Custom checkbox: hides the native input (kept for a11y/keyboard) and renders
+   a token-based control. Checked = filled with --accent + a CSS checkmark.
+   --------------------------------------------------------------------------- */
+.checkbox-label {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-width: 0;
+  flex: 1;
+  overflow-wrap: anywhere;
+  cursor: pointer;
+  color: var(--text);
+}
+.checkbox-input {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  opacity: 0;
+  margin: 0;
+  pointer-events: none;
+}
+.checkbox-box {
+  flex: none;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 18px;
+  height: 18px;
+  border: 1.5px solid var(--border);
+  border-radius: 6px;
+  background: transparent;
+  transition:
+    background-color 0.15s ease,
+    border-color 0.15s ease,
+    opacity 0.15s ease;
+}
+.checkbox-box::after {
+  content: "";
+  width: 4px;
+  height: 8px;
+  margin-top: -2px;
+  border: solid var(--bg);
+  border-width: 0 2px 2px 0;
+  transform: rotate(45deg);
+  opacity: 0;
+  transition: opacity 0.15s ease;
+}
+.checkbox-input:checked + .checkbox-box {
+  background: var(--accent);
+  border-color: var(--accent);
+}
+.checkbox-input:checked + .checkbox-box::after {
+  opacity: 1;
+}
+.checkbox-input:focus-visible + .checkbox-box {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}
+
+/* Inline edit reads as an integrated panel, not raw inputs in the row. */
+.edit-panel {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+}
+
+/* Responsive: tighten the canvas and card on small/mobile-web widths so the
+   workspace never feels squeezed. !important only overrides the inline outer
+   padding for this breakpoint. */
+@media (max-width: 700px) {
+  body main {
+    padding: 28px 14px !important;
+  }
+  .workspace,
+  .workspace-wide,
+  .workspace-review,
+  .workspace-sm {
+    max-width: 100%;
+    padding: 24px 18px;
+    border-radius: 12px;
+  }
+}

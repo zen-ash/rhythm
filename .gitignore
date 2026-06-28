@@ -1,0 +1,16 @@
+# dependencies
+node_modules/
+
+# build outputs / caches
+.next/
+.expo/
+.turbo/
+
+# env & secrets
+.env
+.env.*
+!.env.example
+
+# logs & os
+*.log
+.DS_Store

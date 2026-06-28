@@ -1,0 +1,28 @@
+{
+  "name": "@productivity/supabase",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "main": "./src/index.ts",
+  "types": "./src/index.ts",
+  "exports": {
+    ".": {
+      "types": "./src/index.ts",
+      "default": "./src/index.ts"
+    }
+  },
+  "scripts": {
+    "type-check": "tsc --noEmit",
+    "lint": "eslint ."
+  },
+  "dependencies": {
+    "@productivity/shared": "workspace:*",
+    "@supabase/supabase-js": "^2.45.4"
+  },
+  "devDependencies": {
+    "@productivity/eslint-config": "workspace:*",
+    "@productivity/tsconfig": "workspace:*",
+    "eslint": "^9.13.0",
+    "typescript": "~5.6.3"
+  }
+}
