@@ -49,15 +49,25 @@ export function formatReviewRange(startDate: string, endDate: string): string {
   return `${start} – ${end}`;
 }
 
-/** Human-friendly focus duration for the ledger, e.g. "1h 23m", "12m", "0m". */
+/**
+ * Human-friendly focus/leisure duration, e.g. "1h 23m", "12m", "0m". Anything
+ * under a minute reads as "0m" (we never surface raw seconds in the UI).
+ */
 export function formatFocusDuration(totalSeconds: number): string {
   const safe = Math.max(0, Math.floor(totalSeconds));
-  if (safe === 0) return "0m";
   const hours = Math.floor(safe / 3600);
   const minutes = Math.floor((safe % 3600) / 60);
   if (hours > 0) return `${hours}h ${minutes}m`;
-  if (minutes > 0) return `${minutes}m`;
-  return `${safe}s`;
+  return `${minutes}m`;
+}
+
+/** Count with a correctly pluralized noun, e.g. "1 session", "2 sessions". */
+export function pluralize(
+  count: number,
+  singular: string,
+  plural = `${singular}s`,
+): string {
+  return `${count} ${count === 1 ? singular : plural}`;
 }
 
 /**

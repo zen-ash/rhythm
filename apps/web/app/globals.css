@@ -194,6 +194,49 @@ select:focus-visible {
   padding: 32px 28px;
 }
 
+/* Secondary card (e.g. the Leisure box) that sits beside the main workspace. */
+.subcard {
+  width: 100%;
+  background: var(--bg);
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  box-shadow: var(--workspace-shadow);
+  padding: 26px 28px;
+}
+
+/* Today: tasks card on the left, Leisure card to its right on wide screens;
+   stacks vertically (both centered) when there isn't room. */
+.today-layout {
+  display: flex;
+  align-items: flex-start;
+  gap: 20px;
+}
+.today-layout > .workspace {
+  flex: 0 1 600px;
+  width: auto;
+}
+.today-aside {
+  flex: 0 0 300px;
+}
+@media (max-width: 940px) {
+  .today-layout {
+    flex-direction: column;
+    align-items: center;
+    width: 100%;
+  }
+  .today-layout > .workspace {
+    flex: 0 1 auto;
+    width: 100%;
+    max-width: 600px;
+    align-self: center;
+  }
+  .today-aside {
+    flex: 0 1 auto;
+    width: 100%;
+    max-width: 600px;
+  }
+}
+
 /* Metadata pill: a calm, scannable chip for dates / times / durations. */
 .pill {
   display: inline-block;
@@ -284,7 +327,9 @@ select:focus-visible {
   width: 21px;
   height: 21px;
   padding: 0;
-  border: 1.5px solid var(--border);
+  /* Slightly lighter than --border so the empty circle stays visible on the
+     dark surface; hover/done still firm up to --text / --accent. */
+  border: 1.5px solid var(--subtle);
   border-radius: 999px;
   background: transparent;
   cursor: pointer;
@@ -383,6 +428,15 @@ select:focus-visible {
   color: var(--danger);
 }
 
+/* Keep delete quiet: hidden until the row is hovered or focused (keyboard). */
+.task-row .row-del {
+  opacity: 0;
+}
+.task-row:hover .row-del,
+.task-row:focus-within .row-del {
+  opacity: 1;
+}
+
 .task-check:disabled,
 .row-caret:disabled,
 .row-action:disabled,
@@ -401,7 +455,8 @@ select:focus-visible {
   .workspace,
   .workspace-wide,
   .workspace-review,
-  .workspace-sm {
+  .workspace-sm,
+  .subcard {
     max-width: 100%;
     padding: 24px 18px;
     border-radius: 12px;

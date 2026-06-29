@@ -5,6 +5,7 @@ import {
   formatFocusDuration,
   getLocalDayRange,
   getTodayDateString,
+  pluralize,
 } from "@productivity/shared";
 import {
   fetchActiveFocusSession,
@@ -18,6 +19,8 @@ import ActiveTimer from "./active-timer";
 import TaskItem from "./task-item";
 import MainNav from "./main-nav";
 import SubmitButton from "./submit-button";
+import LeisureBox from "./leisure-box";
+import AddTask from "./add-task";
 
 type Task = Tables<"tasks">;
 
@@ -33,17 +36,18 @@ const styles: Record<string, CSSProperties> = {
   },
   column: {
     width: "100%",
-    maxWidth: 600,
     display: "flex",
     flexDirection: "column",
     gap: 28,
   },
-  header: {
+  topbar: {
     display: "flex",
     alignItems: "baseline",
     justifyContent: "space-between",
+    gap: 16,
+    flexWrap: "wrap",
   },
-  title: { margin: 0, fontSize: 22, fontWeight: 600 },
+  title: { margin: 0, fontSize: 26, fontWeight: 600 },
   logout: {
     border: "none",
     background: "none",
@@ -52,6 +56,21 @@ const styles: Record<string, CSSProperties> = {
     fontSize: 13,
     cursor: "pointer",
   },
+  progress: {
+    display: "flex",
+    alignItems: "center",
+    gap: 12,
+    marginTop: -14,
+  },
+  progressTrack: {
+    flex: 1,
+    height: 6,
+    background: "var(--surface)",
+    border: "1px solid var(--border)",
+    borderRadius: 999,
+    overflow: "hidden",
+  },
+  progressLabel: { fontSize: 12, color: "var(--subtle)", whiteSpace: "nowrap" },
   summary: {
     display: "flex",
     flexWrap: "wrap",
@@ -59,35 +78,6 @@ const styles: Record<string, CSSProperties> = {
     fontSize: 13,
     color: "var(--muted)",
     paddingBottom: 4,
-  },
-  addForm: { display: "flex", gap: 8 },
-  input: {
-    flex: 1,
-    padding: "10px 12px",
-    fontSize: 15,
-    border: "1px solid var(--border)",
-    borderRadius: 6,
-    outline: "none",
-    color: "var(--text)",
-    background: "var(--bg)",
-  },
-  dateInput: {
-    padding: "10px 12px",
-    fontSize: 15,
-    border: "1px solid var(--border)",
-    borderRadius: 6,
-    outline: "none",
-    color: "var(--text)",
-    background: "var(--bg)",
-  },
-  addButton: {
-    padding: "10px 14px",
-    fontSize: 15,
-    border: "1px solid var(--text)",
-    borderRadius: 6,
-    background: "var(--text)",
-    color: "var(--bg)",
-    cursor: "pointer",
   },
   sectionLabel: {
     fontSize: 12,
@@ -97,6 +87,8 @@ const styles: Record<string, CSSProperties> = {
     margin: "0 0 8px",
   },
   list: { display: "flex", flexDirection: "column" },
+  todaySection: { marginTop: 8 },
+  nextUp: { fontSize: 13, color: "var(--muted)", margin: "0 0 10px" },
   row: {
     display: "flex",
     alignItems: "center",
@@ -172,35 +164,27 @@ export default async function Home({
 
   const today = getTodayDateString();
   const dayRange = getLocalDayRange(new Date());
-  const [tasksResult, activeSession, sessionsToday, completedTasksToday] =
-    await Promise.all([
-      supabase
-        .from("tasks")
-        .select("*")
-        .or(
-          `scheduled_date.eq.${today},and(scheduled_date.lt.${today},status.neq.completed)`,
-        )
-        .order("scheduled_date", { ascending: true })
-        .order("created_at", { ascending: true }),
-      fetchActiveFocusSession(supabase),
-      supabase
-        .from("focus_sessions")
-        .select("accumulated_seconds")
-        .eq("status", "completed")
-        .gte("ended_at", dayRange.start)
-        .lt("ended_at", dayRange.end),
-      supabase
-        .from("tasks")
-        .select("id")
-        .eq("status", "completed")
-        .gte("completed_at", dayRange.start)
-        .lt("completed_at", dayRange.end),
-    ]);
+  const [tasksResult, activeSession, sessionsToday] = await Promise.all([
+    supabase
+      .from("tasks")
+      .select("*")
+      .or(
+        `scheduled_date.eq.${today},and(scheduled_date.lt.${today},status.neq.completed)`,
+      )
+      .order("scheduled_date", { ascending: true })
+      .order("created_at", { ascending: true }),
+    fetchActiveFocusSession(supabase),
+    supabase
+      .from("focus_sessions")
+      .select("accumulated_seconds")
+      .eq("status", "completed")
+      .gte("ended_at", dayRange.start)
+      .lt("ended_at", dayRange.end),
+  ]);
 
   const tasks: Task[] = tasksResult.data ?? [];
   const focusSecondsToday = calculateDailyFocusTotal(sessionsToday.data ?? []);
   const sessionCountToday = sessionsToday.data?.length ?? 0;
-  const completedCountToday = completedTasksToday.data?.length ?? 0;
 
   let activeTaskTitle = "Focus session";
   if (activeSession) {
@@ -217,12 +201,19 @@ export default async function Home({
   const canStart = activeSession === null;
   const activeTaskId = activeSession?.task_id ?? null;
 
+  const todayTotal = todayTasks.length;
+  const todayDone = todayTasks.filter((t) => t.status === "completed").length;
+  const progressPct = todayTotal > 0 ? Math.round((todayDone / todayTotal) * 100) : 0;
+  const allDone = todayTotal > 0 && todayDone === todayTotal;
+  const nextUp = todayTasks.find((t) => t.status !== "completed") ?? null;
+
   return (
     <main style={styles.main}>
       <RealtimeTasks userId={user.id} />
-      <div className="workspace" style={styles.column}>
-        <div style={styles.header}>
-          <h1 style={styles.title}>Today</h1>
+      <div className="today-layout">
+        <div className="workspace" style={styles.column}>
+        <div style={styles.topbar}>
+          <MainNav />
           <form action={signOut}>
             <SubmitButton className="btn-ghost" style={styles.logout}>
               Log out
@@ -230,13 +221,31 @@ export default async function Home({
           </form>
         </div>
 
-        <MainNav />
+        <h1 style={styles.title}>Today</h1>
 
         <div style={styles.summary}>
           <span className="pill">Focus {formatFocusDuration(focusSecondsToday)}</span>
-          <span className="pill">{sessionCountToday} sessions</span>
-          <span className="pill">{completedCountToday} done</span>
+          <span className="pill">{pluralize(sessionCountToday, "session")}</span>
+          <span className="pill">{pluralize(todayTotal, "task")}</span>
         </div>
+
+        {todayTotal > 0 ? (
+          <div style={styles.progress}>
+            <div style={styles.progressTrack}>
+              <div
+                style={{
+                  height: "100%",
+                  width: `${progressPct}%`,
+                  background: "var(--text)",
+                  borderRadius: 999,
+                }}
+              />
+            </div>
+            <span style={styles.progressLabel}>
+              {todayDone}/{todayTotal} done
+            </span>
+          </div>
+        ) : null}
 
         {activeSession ? (
           <ActiveTimer
@@ -248,26 +257,7 @@ export default async function Home({
           />
         ) : null}
 
-        <form style={styles.addForm} action={createTask}>
-          <input
-            className="field"
-            style={styles.input}
-            name="title"
-            placeholder="Add a task"
-            autoComplete="off"
-            required
-          />
-          <input
-            className="field"
-            style={styles.dateInput}
-            name="scheduled_date"
-            type="date"
-            defaultValue={today}
-          />
-          <SubmitButton className="btn-primary" style={styles.addButton}>
-            Add
-          </SubmitButton>
-        </form>
+        <AddTask action={createTask} today={today} />
 
         {error ? <p style={styles.error}>{error}</p> : null}
 
@@ -288,24 +278,36 @@ export default async function Home({
           </section>
         ) : null}
 
-        <section>
+        <section style={styles.todaySection}>
           <p style={styles.sectionLabel}>Today</p>
           {todayTasks.length === 0 ? (
-            <p style={styles.empty}>Nothing scheduled.</p>
+            <p style={styles.empty}>No tasks for today.</p>
           ) : (
-            <div style={styles.list}>
-              {todayTasks.map((task) => (
-                <TaskItem
-                  key={task.id}
-                  task={task}
-                  canStart={canStart}
-                  isOverdue={false}
-                  isActive={task.id === activeTaskId}
-                />
-              ))}
-            </div>
+            <>
+              {allDone ? (
+                <p style={styles.empty}>All clear for today.</p>
+              ) : nextUp ? (
+                <p style={styles.nextUp}>Next up: {nextUp.title}</p>
+              ) : null}
+              <div style={styles.list}>
+                {todayTasks.map((task) => (
+                  <TaskItem
+                    key={task.id}
+                    task={task}
+                    canStart={canStart}
+                    isOverdue={false}
+                    isActive={task.id === activeTaskId}
+                  />
+                ))}
+              </div>
+            </>
           )}
         </section>
+        </div>
+
+        <div className="today-aside">
+          <LeisureBox />
+        </div>
       </div>
     </main>
   );

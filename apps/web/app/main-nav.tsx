@@ -16,19 +16,31 @@ const styles: Record<string, CSSProperties> = {
   nav: {
     display: "flex",
     alignItems: "baseline",
-    gap: 18,
-    marginTop: -12,
+    gap: 22,
   },
   brand: {
     fontSize: 15,
     fontWeight: 600,
     letterSpacing: "-0.02em",
     color: "var(--text)",
-    marginRight: 6,
+    marginRight: 10,
     userSelect: "none",
   },
-  active: { fontSize: 13, color: "var(--text)", textDecoration: "none" },
-  link: { fontSize: 13, color: "var(--subtle)", textDecoration: "none" },
+  active: {
+    fontSize: 13,
+    fontWeight: 500,
+    color: "var(--text)",
+    textDecoration: "none",
+    borderBottom: "1.5px solid var(--text)",
+    paddingBottom: 2,
+  },
+  link: {
+    fontSize: 13,
+    color: "var(--subtle)",
+    textDecoration: "none",
+    borderBottom: "1.5px solid transparent",
+    paddingBottom: 2,
+  },
 };
 
 /**

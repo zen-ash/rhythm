@@ -131,10 +131,10 @@ export default async function ReviewPage() {
   return (
     <main style={styles.main}>
       <div className="workspace workspace-review" style={styles.column}>
+        <MainNav />
+
         <h1 style={styles.title}>Review</h1>
         <p style={styles.range}>Past 7 days · {formatReviewRange(startDate, endDate)}</p>
-
-        <MainNav />
 
         <section>
           <p style={styles.sectionLabel}>Summary</p>

@@ -71,9 +71,9 @@ export default async function UpcomingPage() {
     <main style={styles.main}>
       <RealtimeTasks userId={user.id} />
       <div className="workspace workspace-wide" style={styles.column}>
-        <h1 style={styles.title}>Upcoming</h1>
-
         <MainNav />
+
+        <h1 style={styles.title}>Upcoming</h1>
 
         {groups.length === 0 ? (
           <p style={styles.empty}>No upcoming tasks.</p>

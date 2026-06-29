@@ -67,9 +67,9 @@ export default async function SettingsPage({
   return (
     <main style={styles.main}>
       <div className="workspace" style={styles.column}>
-        <h1 style={styles.title}>Settings</h1>
-
         <MainNav />
+
+        <h1 style={styles.title}>Settings</h1>
 
         <div style={styles.field}>
           <span style={styles.label}>Email</span>

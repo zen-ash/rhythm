@@ -54,6 +54,23 @@ export function getRolloverTargetDate(
 }
 
 /**
+ * Friendly label for a single date in inputs/rows: "Today", "Tomorrow", else a
+ * compact label like "Mon, Jun 29". Keeps the underlying value as YYYY-MM-DD.
+ */
+export function getFriendlyDateLabel(
+  dateString: string,
+  today: string = getTodayDateString(),
+): string {
+  if (dateString === today) return "Today";
+  if (dateString === addDaysToDateString(today, 1)) return "Tomorrow";
+  return parseDateString(dateString).toLocaleDateString(undefined, {
+    weekday: "short",
+    month: "short",
+    day: "numeric",
+  });
+}
+
+/**
  * Minimal header label for an Upcoming date group: "Tomorrow" for tomorrow's
  * local date, otherwise a calm readable label like "Thursday, Oct 12". Uses the
  * runtime's default locale; pure (no React).

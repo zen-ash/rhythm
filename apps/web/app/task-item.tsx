@@ -32,17 +32,6 @@ const styles: Record<string, CSSProperties> = {
     paddingTop: 12,
     paddingBottom: 12,
   },
-  caret: {
-    border: "none",
-    background: "none",
-    padding: 0,
-    width: 14,
-    textAlign: "center",
-    fontSize: 10,
-    lineHeight: 1,
-    color: "var(--subtle)",
-    cursor: "pointer",
-  },
   descPanel: {
     paddingLeft: 32,
     paddingBottom: 12,
@@ -290,15 +279,6 @@ export default function TaskItem({
             aria-label={done ? "Mark incomplete" : "Mark complete"}
           />
         </form>
-        <button
-          className="row-caret"
-          type="button"
-          aria-label={expanded ? "Collapse" : "Expand"}
-          aria-expanded={expanded}
-          onClick={() => setExpanded((v) => !v)}
-        >
-          {expanded ? "▾" : "▸"}
-        </button>
         <button
           className="btn-ghost"
           style={done ? styles.titleDone : styles.titleButton}

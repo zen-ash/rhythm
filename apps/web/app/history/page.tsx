@@ -115,9 +115,9 @@ export default async function HistoryPage({
   return (
     <main style={styles.main}>
       <div className="workspace workspace-wide" style={styles.column}>
-        <h1 style={styles.title}>History</h1>
-
         <MainNav />
+
+        <h1 style={styles.title}>History</h1>
 
         <div style={styles.dateNav}>
           <Link
