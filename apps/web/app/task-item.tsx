@@ -16,21 +16,57 @@ import SubmitButton from "./submit-button";
 type Task = Tables<"tasks">;
 
 const styles: Record<string, CSSProperties> = {
-  row: {
-    display: "flex",
-    alignItems: "center",
-    gap: 12,
-    paddingTop: 12,
-    paddingBottom: 12,
-    paddingLeft: 0,
-    paddingRight: 0,
+  wrapper: {
     borderBottom: "1px solid var(--border)",
   },
-  rowActive: {
+  wrapperActive: {
     background: "var(--surface)",
     borderLeft: "2px solid var(--accent)",
     paddingLeft: 8,
     borderRadius: 4,
+  },
+  row: {
+    display: "flex",
+    alignItems: "center",
+    gap: 10,
+    paddingTop: 12,
+    paddingBottom: 12,
+  },
+  caret: {
+    border: "none",
+    background: "none",
+    padding: 0,
+    width: 14,
+    textAlign: "center",
+    fontSize: 10,
+    lineHeight: 1,
+    color: "var(--subtle)",
+    cursor: "pointer",
+  },
+  descPanel: {
+    paddingLeft: 32,
+    paddingBottom: 12,
+    display: "flex",
+    flexDirection: "column",
+    gap: 8,
+  },
+  descText: {
+    margin: 0,
+    fontSize: 14,
+    lineHeight: 1.55,
+    color: "var(--muted)",
+    whiteSpace: "pre-wrap",
+    overflowWrap: "anywhere",
+  },
+  descEmpty: { margin: 0, fontSize: 13, color: "var(--subtle)" },
+  editLink: {
+    alignSelf: "flex-start",
+    border: "none",
+    background: "none",
+    padding: 0,
+    fontSize: 13,
+    color: "var(--muted)",
+    cursor: "pointer",
   },
   toggle: {
     width: 20,
@@ -54,7 +90,7 @@ const styles: Record<string, CSSProperties> = {
     padding: 0,
     fontSize: 15,
     color: "var(--text)",
-    cursor: "text",
+    cursor: "pointer",
   },
   titleDone: {
     flex: 1,
@@ -67,7 +103,7 @@ const styles: Record<string, CSSProperties> = {
     fontSize: 15,
     color: "var(--subtle)",
     textDecoration: "line-through",
-    cursor: "text",
+    cursor: "pointer",
   },
   textButton: {
     border: "none",
@@ -173,6 +209,7 @@ export default function TaskItem({
   isActive?: boolean;
 }) {
   const [editing, setEditing] = useState(false);
+  const [expanded, setExpanded] = useState(false);
   const done = task.status === "completed";
 
   if (editing) {
@@ -200,7 +237,7 @@ export default function TaskItem({
           style={styles.textarea}
           name="description"
           defaultValue={task.description ?? ""}
-          placeholder="Notes (optional)"
+          placeholder="Description"
         />
         <input
           className="field"
@@ -240,62 +277,80 @@ export default function TaskItem({
   return (
     <div
       className="task-row"
-      style={isActive ? { ...styles.row, ...styles.rowActive } : styles.row}
+      style={
+        isActive ? { ...styles.wrapper, ...styles.wrapperActive } : styles.wrapper
+      }
     >
-      <form action={toggleTaskStatus}>
-        <input type="hidden" name="id" value={task.id} />
-        <input type="hidden" name="status" value={task.status} />
-        <SubmitButton
-          className="btn-ghost"
-          style={styles.toggle}
-          aria-label="Toggle complete"
+      <div style={styles.row}>
+        <form action={toggleTaskStatus}>
+          <input type="hidden" name="id" value={task.id} />
+          <input type="hidden" name="status" value={task.status} />
+          <SubmitButton
+            className={done ? "task-check is-done" : "task-check"}
+            aria-label={done ? "Mark incomplete" : "Mark complete"}
+          />
+        </form>
+        <button
+          className="row-caret"
+          type="button"
+          aria-label={expanded ? "Collapse" : "Expand"}
+          aria-expanded={expanded}
+          onClick={() => setExpanded((v) => !v)}
         >
-          {done ? "●" : "○"}
-        </SubmitButton>
-      </form>
-      <button
-        className="btn-ghost"
-        style={done ? styles.titleDone : styles.titleButton}
-        type="button"
-        onClick={() => setEditing(true)}
-      >
-        {task.title}
-      </button>
-      {isOverdue ? (
+          {expanded ? "▾" : "▸"}
+        </button>
+        <button
+          className="btn-ghost"
+          style={done ? styles.titleDone : styles.titleButton}
+          type="button"
+          aria-expanded={expanded}
+          onClick={() => setExpanded((v) => !v)}
+        >
+          {task.title}
+        </button>
+        {isOverdue ? (
         <>
           <form action={moveOverdueTask}>
             <input type="hidden" name="id" value={task.id} />
             <input type="hidden" name="target" value="today" />
-            <SubmitButton className="btn-ghost" style={styles.textButton}>
-              Today
-            </SubmitButton>
+            <SubmitButton className="row-action">Today</SubmitButton>
           </form>
           <form action={moveOverdueTask}>
             <input type="hidden" name="id" value={task.id} />
             <input type="hidden" name="target" value="tomorrow" />
-            <SubmitButton className="btn-ghost" style={styles.textButton}>
-              Tomorrow
-            </SubmitButton>
+            <SubmitButton className="row-action">Tomorrow</SubmitButton>
           </form>
         </>
       ) : canStart && !done ? (
         <form action={startTimerAction}>
           <input type="hidden" name="task_id" value={task.id} />
-          <SubmitButton className="btn-ghost" style={styles.startButton}>
-            Start
-          </SubmitButton>
+          <SubmitButton className="row-action">Start</SubmitButton>
         </form>
       ) : null}
-      <form action={deleteTask}>
-        <input type="hidden" name="id" value={task.id} />
-        <SubmitButton
-          className="btn-ghost"
-          style={styles.remove}
-          aria-label="Delete task"
-        >
-          {"×"}
-        </SubmitButton>
-      </form>
+        <form action={deleteTask}>
+          <input type="hidden" name="id" value={task.id} />
+          <SubmitButton className="row-del" aria-label="Delete task">
+            {"×"}
+          </SubmitButton>
+        </form>
+      </div>
+      {expanded ? (
+        <div style={styles.descPanel}>
+          {task.description ? (
+            <p style={styles.descText}>{task.description}</p>
+          ) : (
+            <p style={styles.descEmpty}>No description</p>
+          )}
+          <button
+            className="btn-ghost"
+            style={styles.editLink}
+            type="button"
+            onClick={() => setEditing(true)}
+          >
+            Edit details
+          </button>
+        </div>
+      ) : null}
     </div>
   );
 }
